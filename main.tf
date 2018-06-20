@@ -109,6 +109,42 @@ resource "aws_route_table" "intra" {
   tags = "${merge(var.tags, var.intra_route_table_tags, map("Name", "${var.name}-intra"))}"
 }
 
+#################
+# Database routes
+#################
+resource "aws_route_table" "database" {
+
+  count = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0}"
+
+  vpc_id = "${aws_vpc.this.id}"
+
+  tags = "${merge(var.tags, var.database_route_table_tags, map("Name", (var.single_nat_gateway ? "${var.name}-database" : format("%s-database-%s", var.name, element(var.azs, count.index)))))}"
+}
+
+#################
+# Redshift routes
+#################
+resource "aws_route_table" "redshift" {
+
+  count = "${var.create_vpc && length(var.redshift_subnets) > 0 ? length(var.redshift_subnets) : 0}"
+
+  vpc_id = "${aws_vpc.this.id}"
+
+  tags = "${merge(var.tags, var.redshift_route_table_tags, map("Name", format("%s-redshift-%s", var.name, element(var.azs, count.index))))}"
+}
+
+#################
+# Elasticache routes
+#################
+resource "aws_route_table" "elasticache" {
+
+  count = "${var.create_vpc && length(var.elasticache_subnets) > 0 ? length(var.elasticache_subnets) : 0}"
+
+  vpc_id = "${aws_vpc.this.id}"
+
+  tags = "${merge(var.tags, var.elasticache_route_table_tags,  map("Name", format("%s-elasticache-%s", var.name, element(var.azs, count.index))))}"
+}
+
 ################
 # Public subnet
 ################
@@ -262,6 +298,19 @@ resource "aws_route" "private_nat_gateway" {
   }
 }
 
+resource "aws_route" "database_nat_gateway" {
+  count = "${var.create_vpc && var.enable_nat_gateway ? local.nat_gateway_count : 0}"
+
+  route_table_id         = "${element(aws_route_table.database.*.id, count.index)}"
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = "${element(aws_nat_gateway.this.*.id, count.index)}"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+
 ######################
 # VPC Endpoint for S3
 ######################
@@ -350,21 +399,21 @@ resource "aws_route_table_association" "database" {
   count = "${var.create_vpc && length(var.database_subnets) > 0 ? length(var.database_subnets) : 0}"
 
   subnet_id      = "${element(aws_subnet.database.*.id, count.index)}"
-  route_table_id = "${element(aws_route_table.private.*.id, (var.single_nat_gateway ? 0 : count.index))}"
+  route_table_id = "${element(aws_route_table.database.*.id, (var.single_nat_gateway ? 0 : count.index))}"
 }
 
 resource "aws_route_table_association" "redshift" {
   count = "${var.create_vpc && length(var.redshift_subnets) > 0 ? length(var.redshift_subnets) : 0}"
 
   subnet_id      = "${element(aws_subnet.redshift.*.id, count.index)}"
-  route_table_id = "${element(aws_route_table.private.*.id, (var.single_nat_gateway ? 0 : count.index))}"
+  route_table_id = "${element(aws_route_table.redshift.*.id, (var.single_nat_gateway ? 0 : count.index))}"
 }
 
 resource "aws_route_table_association" "elasticache" {
   count = "${var.create_vpc && length(var.elasticache_subnets) > 0 ? length(var.elasticache_subnets) : 0}"
 
   subnet_id      = "${element(aws_subnet.elasticache.*.id, count.index)}"
-  route_table_id = "${element(aws_route_table.private.*.id, (var.single_nat_gateway ? 0 : count.index))}"
+  route_table_id = "${element(aws_route_table.elasticache.*.id, (var.single_nat_gateway ? 0 : count.index))}"
 }
 
 resource "aws_route_table_association" "intra" {

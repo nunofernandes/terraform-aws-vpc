@@ -156,6 +156,23 @@ output "intra_route_table_ids" {
   value       = ["${aws_route_table.intra.*.id}"]
 }
 
+output "database_route_table_ids" {
+  description = "List of IDs of database route tables"
+  value       = ["${aws_route_table.database.*.id}"]
+}
+
+output "redshift_route_table_ids" {
+  description = "List of IDs of redshift route tables"
+  value       = ["${aws_route_table.redshift.*.id}"]
+}
+
+output "elasticache_route_table_ids" {
+  description = "List of IDs of elasticache route tables"
+  value       = ["${aws_route_table.elasticache.*.id}"]
+}
+
+# NAT Gateway
+
 output "nat_ids" {
   description = "List of allocation ID of Elastic IPs created for AWS NAT Gateway"
   value       = ["${aws_eip.nat.*.id}"]
