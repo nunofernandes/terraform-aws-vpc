@@ -1,8 +1,8 @@
-# Simple VPC
+# VPC with separate private route tables
 
-Configuration in this directory creates set of VPC resources which may be sufficient for development environment.
+Configuration in this directory creates set of VPC resources which may be sufficient for staging or production environment (look into [simple-vpc](../simple-vpc) for more simplified setup). 
 
-There is a public and private subnet created per availability zone in addition to single NAT Gateway shared between all 3 availability zones.
+There are public, private, database, ElastiCache, Redshift subnets, NAT Gateways created in each availability zone. **This example sets up separate private route for database, elasticache and redshift subnets.**.
 
 ## Usage
 
@@ -19,9 +19,7 @@ Note that this example may create resources which can cost money (AWS Elastic IP
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Providers
 
-| Name | Version |
-|------|---------|
-| aws | n/a |
+No provider.
 
 ## Inputs
 
@@ -31,11 +29,12 @@ No input.
 
 | Name | Description |
 |------|-------------|
-| azs | A list of availability zones spefified as argument to this module |
+| database\_subnets | List of IDs of database subnets |
+| elasticache\_subnets | List of IDs of elasticache subnets |
 | nat\_public\_ips | List of public Elastic IPs created for AWS NAT Gateway |
 | private\_subnets | List of IDs of private subnets |
 | public\_subnets | List of IDs of public subnets |
-| vpc\_cidr\_block | The CIDR block of the VPC |
+| redshift\_subnets | List of IDs of elasticache subnets |
 | vpc\_id | The ID of the VPC |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
