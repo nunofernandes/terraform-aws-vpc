@@ -315,6 +315,11 @@ variable "enable_codebuild_endpoint" {
   default     = false
 }
 
+variable "s3_endpoint_security_group_ids" {
+  description = "The ID of one or more security groups to associate with the gateway for S3 endpoint"
+  default     = []
+}
+
 variable "codebuild_endpoint_security_group_ids" {
   description = "The ID of one or more security groups to associate with the network interface for Codebuild endpoint"
   default     = []
@@ -1402,21 +1407,6 @@ variable "elasticache_route_table_tags" {
 variable "intra_route_table_tags" {
   description = "Additional tags for the intra route tables"
   type        = map(string)
-  default     = {}
-}
-
-variable "database_route_table_tags" {
-  description = "Additional tags for the private route tables"
-  default     = {}
-}
-
-variable "redshift_route_table_tags" {
-  description = "Additional tags for the private route tables"
-  default     = {}
-}
-
-variable "elasticache_route_table_tags" {
-  description = "Additional tags for the private route tables"
   default     = {}
 }
 

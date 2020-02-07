@@ -10,9 +10,10 @@ data "aws_vpc_endpoint_service" "s3" {
 resource "aws_vpc_endpoint" "s3" {
   count = var.create_vpc && var.enable_s3_endpoint ? 1 : 0
 
-  vpc_id       = local.vpc_id
-  service_name = data.aws_vpc_endpoint_service.s3[0].service_name
-  tags         = local.vpce_tags
+  vpc_id             = local.vpc_id
+  security_group_ids = var.s3_endpoint_security_group_ids
+  service_name       = data.aws_vpc_endpoint_service.s3[0].service_name
+  tags               = local.vpce_tags
 }
 
 resource "aws_vpc_endpoint_route_table_association" "private_s3" {
